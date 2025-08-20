@@ -1,3 +1,5 @@
+linuxorti.github.io
+
 # Browser
 
 # 🔒 SecureBrowser
