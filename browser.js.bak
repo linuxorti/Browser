@@ -1,0 +1,159 @@
+class SecureBrowser {
+    constructor() {
+        this.currentUrl = 'about:blank';
+        this.isVPNEnabled = false;
+        this.securityLogs = [];
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.loadSecurityRules();
+        this.logSecurityEvent('Браузер запущен', 'success');
+    }
+
+    setupEventListeners() {
+        document.getElementById('goButton').addEventListener('click', () => this.navigate());
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.navigate();
+        });
+        
+        document.getElementById('toggleVPN').addEventListener('click', () => this.toggleVPN());
+        document.getElementById('scanPage').addEventListener('click', () => this.scanCurrentPage());
+        document.getElementById('clearData').addEventListener('click', () => this.clearBrowserData());
+        document.getElementById('secureSearch').addEventListener('click', () => this.secureSearch());
+    }
+
+    navigate() {
+        const input = document.getElementById('urlInput').value.trim();
+        let url;
+
+        if (this.isValidUrl(input)) {
+            url = input.startsWith('http') ? input : `https://${input}`;
+        } else {
+            url = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+        }
+
+        this.currentUrl = url;
+        this.loadUrl(url);
+    }
+
+    isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    loadUrl(url) {
+        const frame = document.getElementById('browserFrame');
+        const securedUrl = this.applySecurityMeasures(url);
+        
+        frame.src = securedUrl;
+        this.logSecurityEvent(`Загружено: ${url}`, 'info');
+    }
+
+    applySecurityMeasures(url) {
+        // Добавляем параметры для блокировки трекеров
+        if (url.includes('?')) {
+            url += '&';
+        } else {
+            url += '?';
+        }
+        
+        url += 'disable_trackers=true&enhanced_privacy=1';
+        return url;
+    }
+
+    toggleVPN() {
+        this.isVPNEnabled = !this.isVPNEnabled;
+        const vpnButton = document.getElementById('toggleVPN');
+        const vpnStatus = document.getElementById('vpnStatus');
+
+        if (this.isVPNEnabled) {
+            vpnButton.textContent = 'Выключить VPN';
+            vpnButton.style.background = '#f44336';
+            vpnStatus.textContent = 'VPN: Вкл';
+            vpnStatus.className = 'status active';
+            this.logSecurityEvent('VPN активирован', 'success');
+        } else {
+            vpnButton.textContent = 'Включить VPN';
+            vpnButton.style.background = '#2196F3';
+            vpnStatus.textContent = 'VPN: Выкл';
+            vpnStatus.className = 'status offline';
+            this.logSecurityEvent('VPN деактивирован', 'warning');
+        }
+    }
+
+    scanCurrentPage() {
+        this.logSecurityEvent('Сканирование страницы...', 'info');
+        
+        // Симуляция сканирования на вирусы
+        setTimeout(() => {
+            const threats = Math.random() > 0.8 ? 1 : 0;
+            if (threats > 0) {
+                this.logSecurityEvent(`Обнаружено ${threats} угроз!`, 'danger');
+            } else {
+                this.logSecurityEvent('Угроз не обнаружено', 'success');
+            }
+        }, 2000);
+    }
+
+    clearBrowserData() {
+        localStorage.clear();
+        sessionStorage.clear();
+        this.logSecurityEvent('Данные браузера очищены', 'success');
+    }
+
+    secureSearch() {
+        const query = document.getElementById('urlInput').value.trim();
+        if (query) {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&safe=active`;
+            this.loadUrl(searchUrl);
+        }
+    }
+
+    logSecurityEvent(message, type = 'info') {
+        const logEntry = {
+            timestamp: new Date().toLocaleTimeString(),
+            message: message,
+            type: type
+        };
+
+        this.securityLogs.push(logEntry);
+        this.updateLogDisplay();
+    }
+
+    updateLogDisplay() {
+        const logsContainer = document.getElementById('securityLogs');
+        logsContainer.innerHTML = '';
+
+        this.securityLogs.slice(-10).forEach(log => {
+            const logElement = document.createElement('div');
+            logElement.className = `log-entry ${log.type}`;
+            logElement.textContent = `[${log.timestamp}] ${log.message}`;
+            logsContainer.appendChild(logElement);
+        });
+    }
+
+    loadSecurityRules() {
+        // Загрузка правил безопасности из localStorage или внешнего источника
+        const rules = localStorage.getItem('securityRules');
+        if (!rules) {
+            const defaultRules = {
+                blockTrackers: true,
+                preventPhishing: true,
+                adBlock: true,
+                antiIPLogging: true
+            };
+            localStorage.setItem('securityRules', JSON.stringify(defaultRules));
+        }
+    }
+}
+
+// Инициализация браузера при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    window.secureBrowser = new SecureBrowser();
+});

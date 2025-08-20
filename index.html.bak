@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureBrowser - Защищенный браузер</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 SecureBrowser</h1>
+            <div class="status-indicators">
+                <span id="vpnStatus" class="status offline">VPN: Выкл</span>
+                <span id="adblockStatus" class="status active">AdBlock: Вкл</span>
+                <span id="privacyStatus" class="status active">Приватность: Вкл</span>
+            </div>
+        </header>
+
+        <div class="browser-controls">
+            <div class="url-bar">
+                <input type="text" id="urlInput" placeholder="Введите URL или поисковый запрос">
+                <button id="goButton">Перейти</button>
+                <button id="secureSearch">🔍 Безопасный поиск</button>
+            </div>
+            
+            <div class="security-controls">
+                <button id="toggleVPN">Включить VPN</button>
+                <button id="scanPage">Сканировать страницу</button>
+                <button id="clearData">Очистить данные</button>
+            </div>
+        </div>
+
+        <div class="browser-content">
+            <iframe id="browserFrame" src="about:blank"></iframe>
+        </div>
+
+        <div class="security-panel">
+            <h3>🛡️ Защита активна</h3>
+            <div class="protection-list">
+                <div class="protection-item">
+                    <span>Блокировка трекеров</span>
+                    <span class="status-badge active">Активно</span>
+                </div>
+                <div class="protection-item">
+                    <span>Защита от фишинга</span>
+                    <span class="status-badge active">Активно</span>
+                </div>
+                <div class="protection-item">
+                    <span>Блокировка рекламы</span>
+                    <span class="status-badge active">Активно</span>
+                </div>
+                <div class="protection-item">
+                    <span>Анти-IP логгинг</span>
+                    <span class="status-badge active">Активно</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-panel">
+            <h3>📊 Лог защиты</h3>
+            <div id="securityLogs" class="logs-container"></div>
+        </div>
+    </div>
+
+    <script src="browser.js"></script>
+    <script src="security.js"></script>
+    <script src="vpn.js"></script>
+</body>
+</html>
+
+<script>
+// CORS прокси для GitHub Pages
+const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+
+// Переопределяем загрузку iframe для обхода CORS
+const originalFrameSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+    get: function() {
+        return originalFrameSrc.get.call(this);
+    },
+    set: function(value) {
+        if (value && !value.startsWith('about:') && !value.startsWith('data:')) {
+            value = corsProxy + value;
+        }
+        originalFrameSrc.set.call(this, value);
+    }
+});
+</script>
